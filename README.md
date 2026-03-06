@@ -1,0 +1,1 @@
+# patroni-ha-cluster
