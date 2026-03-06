@@ -1,6 +1,6 @@
 services:
   etcd1:
-    image: quay.io/coreos/etcd:v3.5
+    image: quay.io/etcd-io/etcd:v3.5.0
     container_name: etcd1
     environment:
       - ETCD_NAME=etcd1
@@ -18,7 +18,7 @@ services:
       - "2380:2380"
 
   etcd2:
-    image: quay.io/coreos/etcd:v3.5
+    image: quay.io/etcd-io/etcd:v3.5.0
     container_name: etcd2
     environment:
       - ETCD_NAME=etcd2
@@ -36,7 +36,7 @@ services:
       - "2382:2380"
 
   etcd3:
-    image: quay.io/coreos/etcd:v3.5
+    image: quay.io/etcd-io/etcd:v3.5.0
     container_name: etcd3
     environment:
       - ETCD_NAME=etcd3
