@@ -54,7 +54,7 @@ services:
       - "2384:2380"
 
   patroni1:
-    image: zalando/patroni
+    image: ongres/patroni
     container_name: patroni1
     environment:
       - PATRONI_ETCD_HOSTS=etcd1:2379,etcd2:2379,etcd3:2379
@@ -76,7 +76,7 @@ services:
       - "8008:8008"
 
   patroni2:
-    image: zalando/patroni
+    image: ongres/patroni
     container_name: patroni2
     environment:
       - PATRONI_ETCD_HOSTS=etcd1:2379,etcd2:2379,etcd3:2379
@@ -98,7 +98,7 @@ services:
       - "8009:8008"
 
   patroni3:
-    image: zalando/patroni
+    image: ongres/patroni
     container_name: patroni3
     environment:
       - PATRONI_ETCD_HOSTS=etcd1:2379,etcd2:2379,etcd3:2379
