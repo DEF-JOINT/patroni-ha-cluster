@@ -1,0 +1,140 @@
+services:
+  etcd1:
+    image: quay.io/coreos/etcd:v3.5
+    container_name: etcd1
+    environment:
+      - ETCD_NAME=etcd1
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd1:2379
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd1:2380
+      - ETCD_INITIAL_CLUSTER=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-1
+    volumes:
+      - etcd-data1:/etcd-data
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+
+  etcd2:
+    image: quay.io/coreos/etcd:v3.5
+    container_name: etcd2
+    environment:
+      - ETCD_NAME=etcd2
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd2:2379
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd2:2380
+      - ETCD_INITIAL_CLUSTER=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-1
+    volumes:
+      - etcd-data2:/etcd-data
+    ports:
+      - "2381:2379"
+      - "2382:2380"
+
+  etcd3:
+    image: quay.io/coreos/etcd:v3.5
+    container_name: etcd3
+    environment:
+      - ETCD_NAME=etcd3
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd3:2379
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-1
+    volumes:
+      - etcd-data3:/etcd-data
+    ports:
+      - "2383:2379"
+      - "2384:2380"
+
+  patroni1:
+    image: zalando/patroni
+    container_name: patroni1
+    environment:
+      - PATRONI_ETCD_HOSTS=etcd1:2379,etcd2:2379,etcd3:2379
+      - PATRONI_NAME=patroni1
+      - PATRONI_RESTAPI_LISTEN=0.0.0.0:8008
+      - PATRONI_RESTAPI_CONNECT=patroni1:8008
+      - PATRONI_POSTGRESQL_LISTEN=0.0.0.0:5432
+      - PATRONI_POSTGRESQL_CONNECT=patroni1:5432
+      - PATRONI_POSTGRESQL_DATA_DIR=/pgdata/pgmaster
+    volumes:
+      - pgdata1:/pgdata
+      - ./patroni/patroni1.yml:/etc/patroni/patroni.yml
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+    ports:
+      - "5432:5432"
+      - "8008:8008"
+
+  patroni2:
+    image: zalando/patroni
+    container_name: patroni2
+    environment:
+      - PATRONI_ETCD_HOSTS=etcd1:2379,etcd2:2379,etcd3:2379
+      - PATRONI_NAME=patroni2
+      - PATRONI_RESTAPI_LISTEN=0.0.0.0:8008
+      - PATRONI_RESTAPI_CONNECT=patroni2:8008
+      - PATRONI_POSTGRESQL_LISTEN=0.0.0.0:5432
+      - PATRONI_POSTGRESQL_CONNECT=patroni2:5432
+      - PATRONI_POSTGRESQL_DATA_DIR=/pgdata/pgmaster
+    volumes:
+      - pgdata2:/pgdata
+      - ./patroni/patroni2.yml:/etc/patroni/patroni.yml
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+    ports:
+      - "5433:5432"
+      - "8009:8008"
+
+  patroni3:
+    image: zalando/patroni
+    container_name: patroni3
+    environment:
+      - PATRONI_ETCD_HOSTS=etcd1:2379,etcd2:2379,etcd3:2379
+      - PATRONI_NAME=patroni3
+      - PATRONI_RESTAPI_LISTEN=0.0.0.0:8008
+      - PATRONI_RESTAPI_CONNECT=patroni3:8008
+      - PATRONI_POSTGRESQL_LISTEN=0.0.0.0:5432
+      - PATRONI_POSTGRESQL_CONNECT=patroni3:5432
+      - PATRONI_POSTGRESQL_DATA_DIR=/pgdata/pgmaster
+    volumes:
+      - pgdata3:/pgdata
+      - ./patroni/patroni3.yml:/etc/patroni/patroni.yml
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+    ports:
+      - "5434:5432"
+      - "8010:8008"
+
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - patroni1
+      - patroni2
+      - patroni3
+
+volumes:
+  etcd-data1:
+  etcd-data2:
+  etcd-data3:
+  pgdata1:
+  pgdata2:
+  pgdata3:

@@ -1,0 +1,34 @@
+# patroni1.yml
+
+scope: my_cluster
+name: patroni2  # Уникальное имя для этого узла
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: patroni2:8008
+
+etcd:
+  hosts: etcd1:2379,etcd2:2379,etcd3:2379  # Указание всех etcd узлов
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: patroni2:5432
+  data_dir: /pgdata/pgmaster
+  bin_dir: /usr/lib/postgresql/12/bin
+  parameters:
+    wal_level: hot_standby
+    max_wal_senders: 5
+    hot_standby: "on"
+    max_replication_slots: 5
+    max_connections: 100
+    shared_buffers: 512MB
+    effective_cache_size: 1GB
+    maintenance_work_mem: 64MB
+    work_mem: 16MB
+
+  authentication:
+    replication:
+      username: repl
+      password: replpass
+    superuser:
+      username: postgres
+      password: supersecret
